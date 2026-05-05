@@ -50,7 +50,7 @@ export default function ManageClaims() {
       toast.success(`Claim ${status.toLowerCase()} successfully!`);
       // Update local state
       setClaims(prev => prev.map(c => 
-        c._id === claimId ? { ...c, status } : c
+        c.id === claimId ? { ...c, status } : c
       ));
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to update claim');
@@ -177,7 +177,7 @@ export default function ManageClaims() {
               <AnimatePresence>
                 {filteredClaims.map((claim, index) => (
                   <motion.div
-                    key={claim._id}
+                    key={claim.id}
                     className={`claim-card ${claim.status.toLowerCase()}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -187,10 +187,10 @@ export default function ManageClaims() {
                     {/* Food Info */}
                     <div className="claim-food">
                       <div className="food-image">
-                        {claim.foodId?.imageUrl ? (
+                        {claim.food?.imageUrl ? (
                           <img 
-                            src={getImageUrl(claim.foodId.imageUrl)} 
-                            alt={claim.foodId?.foodName} 
+                            src={getImageUrl(claim.food.imageUrl)} 
+                            alt={claim.food?.foodName} 
                           />
                         ) : (
                           <div className="food-emoji">
@@ -199,10 +199,10 @@ export default function ManageClaims() {
                         )}
                       </div>
                       <div className="food-details">
-                        <h3>{claim.foodId?.foodName || 'Food Item'}</h3>
+                        <h3>{claim.food?.foodName || 'Food Item'}</h3>
                         <p className="food-quantity">
                           <Package size={14} />
-                          {claim.foodId?.quantity}
+                          {claim.food?.quantity}
                         </p>
                       </div>
                     </div>
@@ -212,23 +212,23 @@ export default function ManageClaims() {
                       <h4>Requested by</h4>
                       <div className="receiver-info">
                         <div className="receiver-avatar">
-                          {claim.receiverId?.name?.charAt(0).toUpperCase() || 'U'}
+                          {claim.receiver?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="receiver-details">
                           <span className="receiver-name">
                             <User size={14} />
-                            {claim.receiverId?.name || 'Unknown'}
+                            {claim.receiver?.name || 'Unknown'}
                           </span>
-                          {claim.receiverId?.email && (
+                          {claim.receiver?.email && (
                             <span className="receiver-email">
                               <Mail size={14} />
-                              {claim.receiverId.email}
+                              {claim.receiver.email}
                             </span>
                           )}
-                          {claim.receiverId?.phone && (
+                          {claim.receiver?.phone && (
                             <span className="receiver-phone">
                               <Phone size={14} />
-                              {claim.receiverId.phone}
+                              {claim.receiver.phone}
                             </span>
                           )}
                         </div>
@@ -251,10 +251,10 @@ export default function ManageClaims() {
                         <div className="action-buttons">
                           <button
                             className="btn btn-success"
-                            onClick={() => handleUpdateStatus(claim._id, 'Approved')}
-                            disabled={actionLoading === claim._id}
+                            onClick={() => handleUpdateStatus(claim.id, 'Approved')}
+                            disabled={actionLoading === claim.id}
                           >
-                            {actionLoading === claim._id ? (
+                            {actionLoading === claim.id ? (
                               <Loader2 size={18} className="spin" />
                             ) : (
                               <CheckCircle size={18} />

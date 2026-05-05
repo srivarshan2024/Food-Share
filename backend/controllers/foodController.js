@@ -13,11 +13,12 @@ exports.createFood = async (req, res) => {
     const food = await Food.create({
       donorId: req.user.id,
       foodName,
-      description,
+      description: description || null,
       quantity,
-      expiryTime,
+      expiryTime: new Date(expiryTime),
       imageUrl,
-      location: { type: 'Point', coordinates: [Number(longitude), Number(latitude)] },
+      latitude: Number(latitude),
+      longitude: Number(longitude),
     });
 
     res.status(201).json(food);
@@ -34,14 +35,12 @@ exports.getNearbyFood = async (req, res) => {
       return res.status(400).json({ message: 'Latitude and longitude are required' });
     }
 
-    const foods = await Food.find({ status: { $in: ['Available', 'Claimed'] } })
-      .where('location')
-      .near({
-        center: { type: 'Point', coordinates: [Number(longitude), Number(latitude)] },
-        maxDistance: Number(maxDistance),
-        spherical: true,
-      })
-      .sort({ expiryTime: 1 });
+    // Use PostGIS geospatial query
+    const foods = await Food.findNearby(
+      Number(latitude),
+      Number(longitude),
+      Number(maxDistance)
+    );
 
     res.json(foods);
   } catch (error) {
@@ -59,13 +58,14 @@ exports.updateFoodStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const food = await Food.findOneAndUpdate(
-      { _id: id, donorId: req.user.id },
-      { status },
-      { new: true }
-    );
-    if (!food) return res.status(404).json({ message: 'Food not found' });
-    res.json(food);
+    // First verify the food belongs to the donor
+    const food = await Food.findById(id);
+    if (!food || food.donorId !== req.user.id) {
+      return res.status(404).json({ message: 'Food not found' });
+    }
+
+    const updatedFood = await Food.updateStatus(id, req.user.id, status);
+    res.json(updatedFood);
   } catch (error) {
     console.error('Update food error:', error.message);
     res.status(500).json({ message: 'Server error' });
@@ -74,7 +74,7 @@ exports.updateFoodStatus = async (req, res) => {
 
 exports.myFoods = async (req, res) => {
   try {
-    const foods = await Food.find({ donorId: req.user.id }).sort({ createdAt: -1 });
+    const foods = await Food.findByDonorId(req.user.id);
     res.json(foods);
   } catch (error) {
     console.error('My foods error:', error.message);

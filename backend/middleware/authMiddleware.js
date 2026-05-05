@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = { id: decoded.id, role: decoded.role };
-    req.userDoc = await User.findById(decoded.id).select('-password');
+    req.userDoc = await User.findByIdWithoutPassword(decoded.id);
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Invalid token' });

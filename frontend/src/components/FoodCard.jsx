@@ -127,7 +127,7 @@ export default function FoodCard({ food, onClaim, showClaimButton = true, userCl
         <div className="food-card-footer">
           <ClaimButton 
             status={food.status} 
-            onClick={() => onClaim && onClaim(food._id)}
+            onClick={() => onClaim && onClaim(food.id)}
             claimStatus={userClaimStatus}
             isExpired={timeLeft.expired}
           />

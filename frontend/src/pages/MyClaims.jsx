@@ -158,17 +158,17 @@ export default function MyClaims() {
             <div className="claims-list">
               {claims.map((claim, index) => (
                 <motion.div
-                  key={claim._id}
+                  key={claim.id}
                   className="claim-card"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
                   <div className="claim-image">
-                    {claim.foodId?.imageUrl ? (
+                    {claim.food?.imageUrl ? (
                       <img 
-                        src={getImageUrl(claim.foodId.imageUrl)} 
-                        alt={claim.foodId?.foodName} 
+                        src={getImageUrl(claim.food.imageUrl)} 
+                        alt={claim.food?.foodName} 
                       />
                     ) : (
                       <div className="claim-emoji">
@@ -179,27 +179,27 @@ export default function MyClaims() {
 
                   <div className="claim-content">
                     <div className="claim-header">
-                      <h3>{claim.foodId?.foodName || 'Food Item'}</h3>
+                      <h3>{claim.food?.foodName || 'Food Item'}</h3>
                       <span className={`badge badge-${getStatusColor(claim.status)}`}>
                         {getStatusIcon(claim.status)}
                         {claim.status}
                       </span>
                     </div>
 
-                    {claim.foodId?.description && (
-                      <p className="claim-description">{claim.foodId.description}</p>
+                    {claim.food?.description && (
+                      <p className="claim-description">{claim.food.description}</p>
                     )}
 
                     <div className="claim-meta">
                       <div className="meta-item">
                         <Package size={16} />
-                        <span>{claim.foodId?.quantity || 'N/A'}</span>
+                        <span>{claim.food?.quantity || 'N/A'}</span>
                       </div>
                       <div className="meta-item">
                         <Clock size={16} />
                         <span>Claimed {formatDate(claim.claimedAt)}</span>
                       </div>
-                      {claim.foodId?.location && (
+                      {claim.food?.location && (
                         <div className="meta-item">
                           <MapPin size={16} />
                           <span>Pickup location set</span>
@@ -214,18 +214,18 @@ export default function MyClaims() {
                       </div>
                     )}
 
-                    {claim.status === 'Approved' && claim.foodId?.donorId && (
+                    {claim.status === 'Approved' && claim.food?.donor && (
                       <div className="donor-contact">
-                        {claim.foodId.donorId.email && (
-                          <a href={`mailto:${claim.foodId.donorId.email}`} className="contact-link">
+                        {claim.food.donor.email && (
+                          <a href={`mailto:${claim.food.donor.email}`} className="contact-link">
                             <Mail size={14} />
-                            <span>{claim.foodId.donorId.email}</span>
+                            <span>{claim.food.donor.email}</span>
                           </a>
                         )}
-                        {claim.foodId.donorId.phone && (
-                          <a href={`tel:${claim.foodId.donorId.phone}`} className="contact-link">
+                        {claim.food.donor.phone && (
+                          <a href={`tel:${claim.food.donor.phone}`} className="contact-link">
                             <Phone size={14} />
-                            <span>{claim.foodId.donorId.phone}</span>
+                            <span>{claim.food.donor.phone}</span>
                           </a>
                         )}
                       </div>

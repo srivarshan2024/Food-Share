@@ -3,7 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+const { connectDB, prisma } = require('./config/db');
 const { startExpiryScheduler } = require('./utils/expiryChecker');
 
 dotenv.config();
@@ -68,14 +68,36 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    
+    const server = app.listen(PORT, () => {
       console.log(`\n🚀 Server running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 API URL: http://localhost:${PORT}/api\n`);
     });
+
     startExpiryScheduler();
+
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+      console.log('\n⏹️  Shutting down server...');
+      server.close(async () => {
+        await prisma.$disconnect();
+        console.log('✅ Server closed and database disconnected');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGTERM', async () => {
+      console.log('\n⏹️  Shutting down server...');
+      server.close(async () => {
+        await prisma.$disconnect();
+        console.log('✅ Server closed and database disconnected');
+        process.exit(0);
+      });
+    });
   } catch (error) {
     console.error('Failed to start server:', error.message);
+    await prisma.$disconnect();
     process.exit(1);
   }
 };

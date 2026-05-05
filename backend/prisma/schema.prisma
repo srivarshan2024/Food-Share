@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      UserRole
+  phone     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  donatedFoods Food[]
+  claims       Claim[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  donor
+  receiver
+}
+
+model Food {
+  id          String   @id @default(cuid())
+  donorId     String
+  foodName    String
+  description String?
+  quantity    String
+  expiryTime  DateTime
+  imageUrl    String?
+
+  // ✅ Simple location (no PostGIS)
+  latitude    Float?
+  longitude   Float?
+
+  status      FoodStatus @default(Available)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  donor       User       @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  claims      Claim[]
+
+  @@index([donorId])
+  @@index([status])
+  @@map("foods")
+}
+
+enum FoodStatus {
+  Available
+  Claimed
+  Expired
+  Completed
+}
+
+model Claim {
+  id         String      @id @default(cuid())
+  foodId     String
+  receiverId String
+  status     ClaimStatus @default(Pending)
+  claimedAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  food       Food        @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  receiver   User        @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([foodId, receiverId])
+  @@index([foodId])
+  @@index([receiverId])
+  @@map("claims")
+}
+
+enum ClaimStatus {
+  Pending
+  Approved
+  Rejected
+}

@@ -29,8 +29,8 @@ export default function FoodList() {
       const res = await api.get('/claims/my-claims');
       const claimsMap = {};
       (res.data || []).forEach(claim => {
-        if (claim.foodId?._id) {
-          claimsMap[claim.foodId._id] = claim.status;
+        if (claim.foodId?.id) {
+          claimsMap[claim.foodId.id] = claim.status;
         }
       });
       setUserClaims(claimsMap);
@@ -185,11 +185,11 @@ export default function FoodList() {
           >
             {filteredFoods.map((food) => (
               <FoodCard 
-                key={food._id} 
+                key={food.id} 
                 food={food} 
                 onClaim={handleClaim}
                 showClaimButton={isAuthenticated && isReceiver}
-                userClaimStatus={userClaims[food._id] || null}
+                userClaimStatus={userClaims[food.id] || null}
               />
             ))}
           </motion.div>
